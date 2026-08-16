@@ -1,0 +1,24 @@
+# data collection
+google-api-python-client
+yt-dlp
+
+# feature extraction
+open_clip_torch
+sentence-transformers
+opencv-python
+pillow
+librosa
+soundfile
+torch
+
+# model + data
+lightgbm
+scikit-learn
+scipy
+pandas
+pyarrow
+numpy
+
+# app + config
+streamlit
+python-dotenv

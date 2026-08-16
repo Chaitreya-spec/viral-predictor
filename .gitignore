@@ -1,0 +1,16 @@
+# secrets — never commit
+.env
+
+# data (large: videos, thumbnails, db, features — regenerate with the pipeline)
+data/
+
+# python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# os / editor
+.DS_Store
+.vscode/
+.idea/
