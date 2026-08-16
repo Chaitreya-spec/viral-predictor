@@ -42,8 +42,8 @@ python src/check_labels.py           # (optional) inspect label balance from the
 # score a new video:
 python src/predict.py my_video.mp4 --title "I climbed the Alps" --niche mountain --channel-median 10000
 
-# or launch the web app:
-streamlit run src/app.py
+# or launch the web app (custom UI):
+uvicorn src.api:app --port 8000     # then open http://localhost:8000
 ```
 
 Start with `--limit 50` to prove it works end-to-end, then drop the flag. Every

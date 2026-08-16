@@ -19,6 +19,9 @@ pandas
 pyarrow
 numpy
 
-# app + config
+# web app + config
+fastapi
+uvicorn[standard]
+python-multipart
 streamlit
 python-dotenv

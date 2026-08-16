@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virality</title>
+<style>
+  /* ── Linear/Vercel-grade premium minimal · follows the OS light/dark setting ── */
+  :root {
+    /* light palette = default; dark overrides below via prefers-color-scheme */
+    --bg: #fbfbfc;
+    --bg-glow: rgba(99,102,241,.08);
+    --surface: #ffffff;
+    --surface-2: #f6f6f8;
+    --border: rgba(0,0,0,.09);
+    --border-strong: rgba(0,0,0,.14);
+    --text: #16161a;
+    --text-dim: #6a6a73;
+    --text-faint: #9a9aa3;
+    --accent: #5b57eb;
+    --accent-hi: #4f46e5;
+    --pos: #16a34a;
+    --neg: #dc2626;
+    --radius: 10px;
+    --radius-sm: 7px;
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter",
+            "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --num: "SF Mono", "JetBrains Mono", ui-monospace, "Menlo", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0c;
+      --bg-glow: rgba(99,102,241,.10);
+      --surface: #101013;
+      --surface-2: #16161a;
+      --border: rgba(255,255,255,.09);
+      --border-strong: rgba(255,255,255,.14);
+      --text: #ededf0;
+      --text-dim: #8a8a93;
+      --text-faint: #5f5f68;
+      --accent: #6366f1;
+      --accent-hi: #818cf8;
+      --pos: #3ecf8e;
+      --neg: #f0616d;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    letter-spacing: -0.011em;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(60% 42% at 50% -8%, var(--bg-glow), transparent 70%);
+  }
+
+  .bar {
+    position: relative; z-index: 2;
+    display: flex; align-items: center;
+    padding: 16px 22px; border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 600; font-size: 15px; letter-spacing: -0.02em; }
+  .brand .dot { width: 15px; height: 15px; border-radius: 5px;
+    background: linear-gradient(135deg, var(--accent-hi), var(--accent)); box-shadow: 0 0 16px var(--bg-glow); }
+
+  main { position: relative; z-index: 1; max-width: 520px; margin: 0 auto; padding: 56px 22px 96px; }
+
+  .hero { text-align: center; margin-bottom: 40px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-hi); margin-bottom: 12px; }
+  .hero h1 { font-size: 32px; font-weight: 620; letter-spacing: -0.032em; line-height: 1.12; }
+  .hero p { color: var(--text-dim); font-size: 15.5px; margin-top: 12px; max-width: 380px; margin-inline: auto; }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px; }
+  .panel-inner { padding: 16px; }
+
+  .lbl { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); margin: 20px 2px 9px; }
+  .lbl:first-child { margin-top: 4px; }
+
+  .drop { border: 1px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 30px 18px;
+    text-align: center; cursor: pointer; transition: border-color .18s, background .18s; }
+  .drop:hover, .drop.drag { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .drop svg { width: 26px; height: 26px; color: var(--text-faint); margin-bottom: 9px; }
+  .drop .a { font-size: 14.5px; font-weight: 500; }
+  .drop .b { font-size: 12.5px; color: var(--text-faint); margin-top: 3px; }
+  .drop.has .a { color: var(--accent-hi); font-weight: 600; }
+
+  input[type=text], input[type=number] {
+    width: 100%; font-family: var(--font); font-size: 14.5px; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 11px 13px; transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  input::placeholder { color: var(--text-faint); }
+
+  .seg { display: flex; gap: 4px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; }
+  .seg button { flex: 1; font-family: var(--font); font-size: 13.5px; font-weight: 500; color: var(--text-dim);
+    background: transparent; border: none; cursor: pointer; padding: 8px 0; border-radius: 5px; transition: all .15s; }
+  .seg button:hover { color: var(--text); }
+  .seg button.on { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.10); }
+  @media (prefers-color-scheme: dark) { .seg button.on { box-shadow: 0 1px 2px rgba(0,0,0,.20); } }
+
+  .btn { width: 100%; margin-top: 22px; font-family: var(--font); font-size: 15px; font-weight: 600; color: #fff;
+    background: var(--accent); border: 1px solid var(--accent); border-radius: var(--radius-sm); padding: 12px;
+    cursor: pointer; transition: filter .15s, transform .08s; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 1px 2px rgba(0,0,0,.2); }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:active { transform: scale(.99); }
+  .btn:disabled { opacity: .4; cursor: default; filter: none; }
+
+  .spin { display: none; width: 22px; height: 22px; margin: 22px auto 4px; border: 2px solid var(--border-strong);
+    border-top-color: var(--accent); border-radius: 50%; animation: sp .7s linear infinite; }
+  .loadtxt { display: none; text-align: center; font-size: 12.5px; color: var(--text-dim); margin-top: 8px; }
+  .loading .spin, .loading .loadtxt { display: block; } .loading .btn { display: none; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  #out { margin-top: 20px; opacity: 0; transform: translateY(10px); transition: opacity .4s ease, transform .4s ease; }
+  #out.show { opacity: 1; transform: none; }
+
+  .status { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 600; letter-spacing: .01em; margin-bottom: 14px; }
+  .status .d { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+  .over  { color: var(--pos); } .avg { color: var(--accent-hi); } .under { color: var(--neg); }
+
+  .hcard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; margin-bottom: 12px;
+    display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .hcard .big { font-family: var(--num); font-size: 46px; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .hcard .k { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 2px; }
+  .hcard .mult { font-family: var(--num); font-size: 22px; font-weight: 600; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .hcard .right { text-align: right; }
+
+  .sig { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 20px 10px; }
+  .sig h3 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-faint); font-weight: 600; padding: 14px 0 6px; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 11px 0; border-top: 1px solid var(--border); }
+  .row .name { flex: 1; font-size: 14px; }
+  .track { width: 78px; height: 4px; background: var(--surface-2); border-radius: 2px; position: relative; }
+  .fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+  .row.pos .fill { left: 50%; background: var(--pos); } .row.neg .fill { right: 50%; background: var(--neg); }
+  .row .v { font-family: var(--num); font-size: 13px; width: 44px; text-align: right; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  .foot { text-align: center; font-size: 12px; color: var(--text-faint); margin-top: 20px; line-height: 1.6; }
+  @media (max-width: 460px) { .hero h1 { font-size: 27px; } .hcard .big { font-size: 38px; } }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <div class="brand"><span class="dot"></span> Virality</div>
+  </div>
+
+  <main>
+    <div class="hero">
+      <div class="eyebrow">Video Performance Model</div>
+      <h1>Will it beat your baseline?</h1>
+      <p>Upload a video and get a predicted lift versus your channel's typical views — with the reasons.</p>
+    </div>
+
+    <div class="panel" id="form">
+      <div class="panel-inner">
+        <label class="lbl">Video</label>
+        <div class="drop" id="drop">
+          <input type="file" id="file" accept="video/*" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M12 4l-3.5 3.5M12 4l3.5 3.5"/><path d="M5 15v3a2 2 0 002 2h10a2 2 0 002-2v-3"/></svg>
+          <div class="a" id="da">Drop a video, or click to browse</div>
+          <div class="b" id="db">MP4 · MOV · WEBM</div>
+        </div>
+
+        <label class="lbl">Title</label>
+        <input type="text" id="title" placeholder="I climbed the Alps solo">
+
+        <label class="lbl">Niche</label>
+        <div class="seg" id="niche">
+          <button class="on" data-v="mountain">Mountain</button>
+          <button data-v="racing">Racing</button>
+          <button data-v="travel">Travel</button>
+        </div>
+
+        <label class="lbl">Channel's typical views</label>
+        <input type="number" id="median" value="10000" min="1" step="500">
+
+        <button class="btn" id="go" disabled>Analyse</button>
+        <div class="spin"></div>
+        <div class="loadtxt">Extracting features &amp; scoring…</div>
+      </div>
+    </div>
+
+    <div id="out"></div>
+  </main>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const fileI = $('#file'), drop = $('#drop'), go = $('#go'), form = $('#form'), out = $('#out');
+  let niche = 'mountain';
+
+  document.querySelectorAll('#niche button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('#niche button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); niche = b.dataset.v;
+  });
+
+  drop.onclick = () => fileI.click();
+  fileI.onchange = () => show(fileI.files[0]);
+  ['dragover','dragenter'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(e => drop.addEventListener(e, ev => { ev.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', ev => { const f = ev.dataTransfer.files[0]; if (f){ fileI.files = ev.dataTransfer.files; show(f); } });
+  function show(f){ if(!f) return; drop.classList.add('has');
+    $('#da').textContent = f.name; $('#db').textContent = (f.size/1e6).toFixed(1)+' MB — click to change'; go.disabled = false; }
+
+  go.onclick = async () => {
+    const f = fileI.files[0]; if(!f) return;
+    form.classList.add('loading'); out.classList.remove('show');
+    const fd = new FormData();
+    fd.append('video', f); fd.append('title', $('#title').value);
+    fd.append('niche', niche); fd.append('channel_median', $('#median').value);
+    try {
+      const r = await fetch('/predict', { method:'POST', body: fd });
+      if(!r.ok) throw new Error('server '+r.status);
+      render(await r.json());
+    } catch(e){ out.innerHTML = '<div class="sig" style="color:var(--neg);padding:18px 20px">Something went wrong — '+e.message+'</div>'; out.classList.add('show'); }
+    finally { form.classList.remove('loading'); }
+  };
+
+  function render(d){
+    const cls = d.lift > 0.7 ? 'over' : d.lift > -0.2 ? 'avg' : 'under';
+    const word = d.lift > 0.7 ? 'Likely to overperform' : d.lift > -0.2 ? 'Around average' : 'Likely to underperform';
+    const max = Math.max(...d.factors.map(f => Math.abs(f.value)), .001);
+    const rows = d.factors.map(f => {
+      const pos = f.value > 0, w = Math.round(Math.abs(f.value)/max*38);
+      return `<div class="row ${pos?'pos':'neg'}"><div class="name">${f.label}</div>
+        <div class="track"><div class="fill" style="width:${w}px"></div></div>
+        <div class="v">${f.value>0?'+':''}${f.value}</div></div>`;
+    }).join('');
+    out.innerHTML = `
+      <div class="status ${cls}"><span class="d"></span>${word}</div>
+      <div class="hcard">
+        <div><div class="k">Predicted lift</div><div class="big">${d.lift>0?'+':''}${d.lift}</div></div>
+        <div class="right"><div class="k">vs channel normal</div><div class="mult">~${d.multiplier}×</div></div>
+      </div>
+      <div class="sig"><h3>Signals</h3>${rows}</div>
+      <div class="foot">Predicts performance relative to your baseline, so channel size is controlled for — not rewarded.</div>`;
+    requestAnimationFrame(() => out.classList.add('show'));
+  }
+</script>
+</body>
+</html>
